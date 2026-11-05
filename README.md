@@ -31,17 +31,17 @@ SuperCatch website; the MCP tools do not purchase or edit anything.
 | Public tool | Purpose |
 | --- | --- |
 | `search_marketplace` | Find card and collectibles listings. |
-| `lookup_product` | Read a product's current facts, price, and availability. |
-| `lookup_store` | Find a public seller storefront. |
+| `get_product` | Read a product's current facts, price, and availability. |
+| `get_storefront` | Find a public seller storefront. |
 | `get_help_resource` | Find public help and agent documentation. |
-| `search_docs` | Read public documentation summaries and citations. |
+| `search_public_docs` | Read public documentation summaries and citations. |
 | `get_api_catalog` | Find API catalog and OpenAPI discovery links. |
 
 | Account tool | Consent required |
 | --- | --- |
-| `my_orders`, `my_watchlist` | `account:read` for your own purchases and watchlist. |
+| `list_account_orders`, `list_account_watchlist` | `account:read` for your own purchases and watchlist. |
 | `search_account_docs` | `docs:read`; private staff guides also require current staff permissions. |
-| `store_listings`, `store_inventory`, `store_orders` | `store:read` and current ownership of an eligible store. |
+| `list_store_listings`, `get_store_inventory`, `list_store_orders` | `store:read` and current ownership of an eligible store. |
 
 ## Optional account access
 
@@ -85,7 +85,10 @@ command. Review changes before updating an installed extension.
 ## Maintainers
 
 The root `gemini-extension.json` is the complete integration. Its version is
-independent of the remote MCP server version. Before releasing:
+independent of the remote MCP server version. Version 1.0.2 adopts the canonical
+`get_*`, `list_*` and `search_public_docs` names without adding tools or scopes.
+Release it after the endpoint advertises those names; the endpoint keeps its
+previous names callable for older clients. Before releasing:
 
 1. Compare the allowlist with live `tools/list`; require every listed tool to
    advertise `readOnlyHint: true`.

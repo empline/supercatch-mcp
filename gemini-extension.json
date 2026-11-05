@@ -1,6 +1,6 @@
 {
   "name": "supercatch",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Search SuperCatch cards, prices, stores, and docs; account reads require separate OAuth consent.",
   "mcpServers": {
     "supercatch": {
@@ -11,17 +11,17 @@
       },
       "includeTools": [
         "search_marketplace",
-        "lookup_product",
-        "lookup_store",
+        "get_product",
+        "get_storefront",
         "get_help_resource",
-        "search_docs",
+        "search_public_docs",
         "get_api_catalog",
         "search_account_docs",
-        "my_orders",
-        "my_watchlist",
-        "store_listings",
-        "store_inventory",
-        "store_orders"
+        "list_account_orders",
+        "list_account_watchlist",
+        "list_store_listings",
+        "get_store_inventory",
+        "list_store_orders"
       ]
     }
   }
