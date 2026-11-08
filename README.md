@@ -1,4 +1,35 @@
-# SuperCatch for Gemini CLI
+# SuperCatch MCP connector
+
+SuperCatch's hosted MCP endpoint is `https://supercatch.com/api/mcp` (Streamable HTTP). This public repository contains connector metadata and setup documentation.
+
+## Cline
+
+In Cline, open **MCP Servers → Remote Servers**, enter the endpoint above, and choose **Streamable HTTP**. For Cline CLI:
+
+```sh
+cline mcp add supercatch https://supercatch.com/api/mcp --transport http --yes
+```
+
+For the IDE extension's `cline_mcp_settings.json`:
+
+```json
+{
+  "mcpServers": {
+    "supercatch": {
+      "type": "streamableHttp",
+      "url": "https://supercatch.com/api/mcp",
+      "disabled": false,
+      "autoApprove": []
+    }
+  }
+}
+```
+
+Public searches need no account or API key. Cline discovers the current tools from the hosted server. Account and seller tools require their own OAuth scopes and documented confirmations or native approvals. Review each grant and tool call; no automatic tool approval is included here.
+
+The clean-profile Cline CLI installation and public marketplace search were tested on 2026-11-08. This does not certify signed-in account or write workflows. See [installation guidance](llms-install.md) and [the recorded client check](cline-installation-proof.json).
+
+## Gemini CLI
 
 Connect [Gemini CLI](https://geminicli.com/docs/get-started/installation/) to
 [SuperCatch](https://supercatch.com) to search trading cards and collectibles,
@@ -9,7 +40,7 @@ its existing MCP integration.
 ## Install
 
 ```sh
-gemini extensions install https://github.com/empline/supercatch-gemini
+gemini extensions install https://github.com/empline/supercatch-mcp
 ```
 
 Restart an existing Gemini CLI session after installation. Run `/mcp` inside
@@ -93,7 +124,7 @@ command. Review changes before updating an installed extension.
 
 ## Maintainers
 
-The root `gemini-extension.json` is the complete integration. Its version is
+The root `gemini-extension.json` is the Gemini CLI integration. Its version is
 independent of the remote MCP server version. Version 1.1.0 adopts the prefixed
 canonical names and the full current tool catalog while retaining read-only
 initial OAuth scopes and client confirmation prompts. Before releasing:
