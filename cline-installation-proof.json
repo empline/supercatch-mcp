@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-11-08T19:29:33.382Z",
+  "clineCliVersion": "3.0.74",
+  "clineCoreVersion": "0.2.0",
+  "profile": "isolated without account credentials",
+  "configurationInstalledBy": "actual cline mcp add command",
+  "setupSource": "published connector README endpoint and Streamable HTTP transport",
+  "readmeSha256": "8ea5ffc54eee7a36710a6359ef6606f1f310873dbf553de091dd5c130fc5ff54",
+  "connected": true,
+  "transport": "streamableHttp",
+  "endpoint": "https://supercatch.com/api/mcp",
+  "toolCount": 81,
+  "publicReadTool": "supercatch_search_marketplace",
+  "publicReadSucceeded": true,
+  "privateAccountAndWriteAcceptance": "not-tested",
+  "fullCatalogSha256": "ea46fc1a5a81eb4394a36f9725671776c6ee1ca1b8ba8c8d1421a62f422de7be"
+}
