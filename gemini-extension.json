@@ -7,11 +7,7 @@
       "httpUrl": "https://supercatch.com/api/mcp",
       "oauth": {
         "enabled": true,
-        "scopes": [
-          "account:read",
-          "store:read",
-          "docs:read"
-        ]
+        "scopes": ["account:read", "store:read", "docs:read"]
       },
       "includeTools": [
         "supercatch_search_marketplace",

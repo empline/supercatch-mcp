@@ -3,15 +3,15 @@
   "sourceRepository": "https://github.com/empline/supercatch",
   "sourceDirectory": "integrations/mcp",
   "manifestSource": "integrations/gemini/gemini-extension.json",
-  "sourceSha256": "5d02cdb11cd9d104e722b1d159c434def591becec19fa077a2f7e71084360ca5",
-  "toolingSha256": "398224913e48bede6f9847a5719c32235e3c4a5df29a0143dc9407b20fed8d88",
+  "sourceSha256": "498f32805443923d25587944aa288a37379273be2e0c2e3bb85386b3856eda25",
+  "toolingSha256": "62f79bf45fea352b5b30993538707b2ef4cb756d5b495b2980afa136c0c06016",
   "files": {
     ".githooks/pre-commit": {
-      "sha256": "7754c2c2a0a14669666e65179587db634a82b85531bb8526817cfb8bb22069ff",
+      "sha256": "35ceec1f1305ff1e2837d603f8b7b69b175456ee1b4ba93c16d6bb465a8a3962",
       "mode": 33261
     },
     ".githooks/pre-push": {
-      "sha256": "7754c2c2a0a14669666e65179587db634a82b85531bb8526817cfb8bb22069ff",
+      "sha256": "1b53a94f04b3d62f31323c90cb88b2c2a94bd159b6033eacf18829577da0cd7c",
       "mode": 33261
     },
     ".gitignore": {
@@ -55,7 +55,7 @@
       "mode": 33188
     },
     "scripts/contract.mjs": {
-      "sha256": "01f781b2d0b5fa513ae069e910292c82765771e06fe344ddf0d5b0604fa1c995",
+      "sha256": "ce37d3e94d7990835d6f11e5d12f52108c8aeaf30a674e8c4102552ae8abeca6",
       "mode": 33188
     },
     "scripts/install-hooks.mjs": {
@@ -63,7 +63,7 @@
       "mode": 33188
     },
     "scripts/validate.mjs": {
-      "sha256": "08bc27577be83b97f763ff42088ab230101bcfa64b6a95c0c97d697774eca439",
+      "sha256": "efcfcd73affec91628fba89758ae874e7cf93981037ed94ac4ac912d696caf9a",
       "mode": 33188
     },
     "tests/contract.test.mjs": {

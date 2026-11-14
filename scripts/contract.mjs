@@ -2,10 +2,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
 import ts from 'typescript';
 
-export const runner = "import { inspectConnector } from './contract.mjs';\nconst findings = inspectConnector(process.cwd());\nif (findings.length) { console.error(findings.join('\\n')); process.exitCode = 1; }\nelse console.log('MCP connector contract passed.');\n";
-export const hook = '#!/bin/sh\nset -eu\nnpm test\n';
+export const runner = "import fs from 'node:fs';\nimport { inspectConnector, inspectGitIndex, inspectGitRefs } from './contract.mjs';\nconst mode = process.argv[2] ?? '--working';\nif (process.argv.length > 3 || !['--working', '--index', '--refs'].includes(mode)) throw new Error('Invalid connector validation mode');\nconst findings = mode === '--index' ? inspectGitIndex(process.cwd()) : mode === '--refs' ? inspectGitRefs(process.cwd(), fs.readFileSync(0, 'utf8')) : inspectConnector(process.cwd());\nif (findings.length) { console.error(findings.join('\\n')); process.exitCode = 1; }\nelse console.log('MCP connector contract passed.');\n";
+export const hook = '#!/bin/sh\nset -eu\nnode scripts/validate.mjs --index\nnpm test\n';
+export const pushHook = '#!/bin/sh\nset -eu\nnode scripts/validate.mjs --refs\nnpm test\n';
 export const installer = "import { execFileSync } from 'node:child_process';\nimport fs from 'node:fs';\nconst root = execFileSync('git', ['rev-parse', '--show-toplevel'], {encoding: 'utf8'}).trim();\nif (fs.realpathSync(root) !== fs.realpathSync(process.cwd())) throw new Error('Install connector hooks from its Git root');\nexecFileSync('git', ['config', '--local', 'core.hooksPath', '.githooks']);\n";
 export const headings = ['Install in Cline', 'Install in Gemini CLI', 'Capabilities and access', 'Tool exposure', 'Update or uninstall', 'Verification', 'Links'];
 export const license = 'Copyright (c) Empline. All rights reserved.\n\nThe hosted service is governed by its published Terms and Privacy Policy.\nNo open-source license is granted for this repository.\n';
@@ -100,7 +102,7 @@ export function inspectConnectorContents({read, readBinary, exists, executable, 
     if (createHash('sha256').update(read('tests/contract.test.mjs')).digest('hex') !== testSuiteSha256) fail('Required mutation suite drift');
     if (read('scripts/install-hooks.mjs') !== installer) fail('Hook installer drift');
     for (const name of ['pre-commit', 'pre-push']) {
-      if (read(`.githooks/${name}`) !== hook || !executable(`.githooks/${name}`)) fail('Mandatory executable Git hook drift');
+      if (read(`.githooks/${name}`) !== (name === 'pre-push' ? pushHook : hook) || !executable(`.githooks/${name}`)) fail('Mandatory executable Git hook drift');
     }
     if (exists('.github/workflows')) fail('GitHub Actions are retired; verification runs on the workstation');
     if (read('LICENSE') !== license) fail('Explicit proprietary license notice required');
@@ -129,4 +131,63 @@ export function inspectConnectorContents({read, readBinary, exists, executable, 
     }
   } catch (error) { fail(error.message); }
   return findings;
+}
+
+/** Inspect Git blobs as data; never run scripts or checkout files from a pushed ref. */
+function inspectGitSnapshot(root, index, oid) {
+  const env = {...process.env};
+  for (const key of Object.keys(env)) {
+    if (key.startsWith('GIT_') && !(key === 'GIT_INDEX_FILE' && index && fs.realpathSync(root) === fs.realpathSync(process.cwd()))) delete env[key];
+  }
+  env.GIT_OPTIONAL_LOCKS = '0'; env.GIT_TERMINAL_PROMPT = '0';
+  const git = args => execFileSync('git', ['-C', root, ...args], {env, maxBuffer: 32 * 1048576, stdio: ['ignore', 'pipe', 'pipe']});
+  const top = git(['rev-parse', '--show-toplevel']).toString('utf8').trim();
+  if (fs.realpathSync(top) !== fs.realpathSync(root)) throw new Error('Validate a connector Git root, not a parent repository');
+  let bytes;
+  if (index) bytes = git(['ls-files', '--stage', '-z']);
+  else {
+    if (!/^[a-f0-9]{40}(?:[a-f0-9]{24})?$/.test(oid)) throw new Error('Pushed Git object id is invalid');
+    const commit = git(['rev-parse', '--verify', oid + '^{commit}']).toString('utf8').trim();
+    bytes = git(['ls-tree', '-rz', '--full-tree', commit]);
+  }
+  const entries = new Map();
+  for (const record of bytes.toString('utf8').split('\0').filter(Boolean)) {
+    const match = (index ? /^([0-7]{6}) ([a-f0-9]{40}(?:[a-f0-9]{24})?) ([0-3])\t([\s\S]+)$/ : /^([0-7]{6}) (blob|commit) ([a-f0-9]{40}(?:[a-f0-9]{24})?)\t([\s\S]+)$/).exec(record);
+    if (!match || index && match[3] !== '0') throw new Error('Connector Git snapshot has malformed or unmerged entries');
+    const mode = parseInt(match[1], 8), hash = index ? match[2] : match[3], file = match[4];
+    if (![0o100644, 0o100755].includes(mode)) throw new Error('Connector snapshots cannot contain symlinks or submodules');
+    entries.set(file, {mode, hash});
+  }
+  const cache = new Map();
+  const readBinary = file => {
+    const entry = entries.get(file);
+    if (!entry) throw new Error(file + ': missing from Git snapshot');
+    if (!cache.has(entry.hash)) cache.set(entry.hash, git(['cat-file', 'blob', entry.hash]));
+    return cache.get(entry.hash);
+  };
+  return inspectConnectorContents({readBinary, read: file => {
+    const value = readBinary(file);
+    if (value.length > 1048576) throw new Error('Connector metadata exceeds 1 MiB');
+    return value.toString('utf8');
+  }, files: () => [...entries.keys()].sort(), exists: file => entries.has(file) || [...entries.keys()].some(key => key.startsWith(file + '/')),
+  executable: file => Boolean(entries.get(file)?.mode & 0o111)});
+}
+
+export function inspectGitIndex(root) {
+  try { return inspectGitSnapshot(root, true); }
+  catch (error) { return ['Connector Git index validation failed: ' + error.message]; }
+}
+
+export function inspectGitRefs(root, input) {
+  try {
+    if (typeof input !== 'string' || input.length > 65536) throw new Error('Connector push ref input exceeds its limit');
+    const ids = new Set();
+    for (const line of input.trim().split('\n').filter(Boolean)) {
+      const parts = line.trim().split(/\s+/);
+      if (parts.length !== 4 || ![parts[1], parts[3]].every(value => /^[a-f0-9]{40}(?:[a-f0-9]{24})?$/.test(value))) throw new Error('Malformed connector push ref input');
+      if (!/^0+$/.test(parts[1])) ids.add(parts[1]);
+    }
+    if (!input.trim()) ids.add(execFileSync('git', ['-C', root, 'rev-parse', '--verify', 'HEAD'], {encoding: 'utf8'}).trim());
+    return [...ids].flatMap(oid => inspectGitSnapshot(root, false, oid).map(finding => oid + ': ' + finding));
+  } catch (error) { return ['Connector pushed-ref validation failed: ' + error.message]; }
 }
