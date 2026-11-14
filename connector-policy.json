@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "name": "supercatch",
+  "title": "SuperCatch",
+  "domain": "supercatch.com",
+  "auth": "oauth",
+  "toolExposure": "reviewed-allowlist"
+}

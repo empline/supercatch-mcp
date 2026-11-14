@@ -2,7 +2,9 @@
 
 SuperCatch's hosted MCP endpoint is `https://supercatch.com/api/mcp` (Streamable HTTP). This public repository contains connector metadata and setup documentation.
 
-## Cline
+## Install in Cline
+
+### Cline
 
 In Cline, open **MCP Servers → Remote Servers**, enter the endpoint above, and choose **Streamable HTTP**. For Cline CLI:
 
@@ -29,7 +31,9 @@ Public searches need no account or API key. Cline discovers the current tools fr
 
 The clean-profile Cline CLI installation and public marketplace search were tested on 2026-11-08. This does not certify signed-in account or write workflows. See [installation guidance](llms-install.md) and [the recorded client check](cline-installation-proof.json).
 
-## Gemini CLI
+## Install in Gemini CLI
+
+### Gemini CLI
 
 Connect [Gemini CLI](https://geminicli.com/docs/get-started/installation/) to
 [SuperCatch](https://supercatch.com) to search trading cards and collectibles,
@@ -37,7 +41,7 @@ inspect product prices and availability, find seller stores, read public
 documentation, and use separately consented account and seller workflows through
 its existing MCP integration.
 
-## Install
+### Install
 
 ```sh
 gemini extensions install https://github.com/empline/supercatch-mcp
@@ -48,7 +52,9 @@ Gemini CLI to inspect the connection. Public searches need no SuperCatch account
 or API key. The extension connects over Streamable HTTP to
 `https://supercatch.com/api/mcp`; it installs no local server or extra dependencies.
 
-## Try it
+## Capabilities and access
+
+### Try it
 
 - "Use SuperCatch to find Pikachu cards. Show listing prices and source links."
 - "Use SuperCatch to look up the current product details for a search result."
@@ -60,7 +66,7 @@ SuperCatch website. Write tools require their own OAuth scopes and the
 confirmation or native SuperCatch approval required by that workflow. Checkout,
 payments, refunds, and shipping-label purchases are outside this integration.
 
-## Available tools
+### Available tools
 
 The manifest explicitly includes all 81 canonical tools advertised by SuperCatch
 MCP 1.26.0. Tool names use the `supercatch_` prefix. The extension uses the same
@@ -80,7 +86,7 @@ and `gemini-extension.json` for exact names. Discovery does not grant execution
 permission. Native approvals apply only to workflows that require them; other
 writes retain their documented exact-confirmation and consent requirements.
 
-## Optional account access
+### Optional account access
 
 Account tools use the same endpoint with SuperCatch's existing OAuth flow. They
 refuse anonymous requests with HTTP 401. Public tools remain available without
@@ -112,6 +118,12 @@ Tool arguments are sent to SuperCatch over HTTPS. See the
 [agent guide](https://supercatch.com/ai), [Privacy](https://supercatch.com/privacy),
 and [Terms](https://supercatch.com/terms).
 
+## Tool exposure
+
+Policy: `reviewed-allowlist`. The manifest pins a reviewed tool allowlist. New tools require a reviewed manifest update. Inclusion does not grant scopes or approve actions.
+
+Authentication policy: `oauth`. The hosted endpoint is `https://supercatch.com/api/mcp`. No credentials or automatic tool approvals are bundled.
+
 ## Update or uninstall
 
 ```sh
@@ -119,10 +131,13 @@ gemini extensions update supercatch
 gemini extensions uninstall supercatch
 ```
 
-For a reproducible installation, append `--ref <full-commit-sha>` to the install
-command. Review changes before updating an installed extension.
+Pin `--ref <full-commit-sha>` when a reproducible installation is required.
 
-## Maintainers
+## Verification
+
+Run `npm ci --ignore-scripts` and `npm test`. The canonical JSON AST guard rejects metadata drift and duplicate keys; mutation tests prove refusal of unsafe configuration and bypassed validation. Push and pull-request CI run the same checks. These packaging checks do not certify signed-in workflows or live service behavior.
+
+### Maintainers
 
 The root `gemini-extension.json` is the Gemini CLI integration. Its version is
 independent of the remote MCP server version. Version 1.1.0 adopts the prefixed
@@ -150,3 +165,7 @@ Google's [gallery](https://geminicli.com/extensions/) discovers public tagged
 repositories on a documented daily crawl and lists extensions that pass
 validation. Publishing here does not establish inclusion or endorsement.
 [Release requirements](https://geminicli.com/docs/extensions/releasing/#list-your-extension-in-the-gallery).
+
+## Links
+
+Support: support@supercatch.com · [Privacy](https://supercatch.com/privacy) · [Terms](https://supercatch.com/terms)

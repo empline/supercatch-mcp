@@ -1,0 +1,17 @@
+{
+  "name": "supercatch-mcp",
+  "version": "1.1.1",
+  "private": true,
+  "type": "module",
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/empline/supercatch-mcp.git"
+  },
+  "scripts": {
+    "test": "node scripts/validate.mjs && node --test tests/contract.test.mjs"
+  },
+  "devDependencies": {
+    "typescript": "6.0.3"
+  }
+}
