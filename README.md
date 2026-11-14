@@ -135,6 +135,8 @@ Pin `--ref <full-commit-sha>` when a reproducible installation is required.
 
 ## Verification
 
+This repository is generated from [the owning application](https://github.com/empline/supercatch/tree/main/integrations/mcp). Edit the app-owned payload there. From the application root, run `node integrations/mcp/tooling/source.mjs --check` or `--export`; do not maintain a separate connector project.
+
 Run `npm ci` and `npm test`. The canonical JSON AST guard rejects metadata drift and duplicate keys; mutation tests prove refusal of unsafe configuration and bypassed validation. The installed pre-commit and pre-push hooks run the same checks on the workstation. GitHub Actions are disabled. These packaging checks do not certify signed-in workflows or live service behavior.
 
 ### Maintainers

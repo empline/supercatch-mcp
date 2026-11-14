@@ -4,5 +4,6 @@
   "title": "SuperCatch",
   "domain": "supercatch.com",
   "auth": "oauth",
-  "toolExposure": "reviewed-allowlist"
+  "toolExposure": "reviewed-allowlist",
+  "distribution": "app-owned"
 }
