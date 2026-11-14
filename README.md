@@ -72,14 +72,14 @@ The manifest explicitly includes all 81 canonical tools advertised by SuperCatch
 MCP 1.26.0. Tool names use the `supercatch_` prefix. The extension uses the same
 remote server, schemas, account isolation, and approval flows as other clients.
 
-| Capability | Examples |
-| --- | --- |
-| Public marketplace and docs | `supercatch_search_marketplace`, `supercatch_get_product`, `supercatch_search_public_docs` |
-| Account reads | Orders, saved searches, watchlist, collection and support cases. |
-| Seller reads | Listings, images, inventory, sales, stock aging, imports, integrations and orders. |
-| Account writes | Saved searches, watchlist changes and reviewed support cases/replies. |
-| Seller writes | Draft listing edits, prices, inventory and stock receipts, submission, publication, import resume, first shipments and tracking corrections. |
-| Recovery | Context, capabilities, connection health, operation plans, status and durable receipts. |
+| Capability                  | Examples                                                                                                                                     |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Public marketplace and docs | `supercatch_search_marketplace`, `supercatch_get_product`, `supercatch_search_public_docs`                                                   |
+| Account reads               | Orders, saved searches, watchlist, collection and support cases.                                                                             |
+| Seller reads                | Listings, images, inventory, sales, stock aging, imports, integrations and orders.                                                           |
+| Account writes              | Saved searches, watchlist changes and reviewed support cases/replies.                                                                        |
+| Seller writes               | Draft listing edits, prices, inventory and stock receipts, submission, publication, import resume, first shipments and tracking corrections. |
+| Recovery                    | Context, capabilities, connection health, operation plans, status and durable receipts.                                                      |
 
 See the [live tool catalog](https://supercatch.com/.well-known/mcp/server-card.json)
 and `gemini-extension.json` for exact names. Discovery does not grant execution

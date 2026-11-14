@@ -3,7 +3,7 @@
   "sourceRepository": "https://github.com/empline/supercatch",
   "sourceDirectory": "integrations/mcp",
   "manifestSource": "integrations/gemini/gemini-extension.json",
-  "sourceSha256": "0f7298561419a1263601baaa4b028f8829a3a86aa0592bc88c954e78fa3c9697",
+  "sourceSha256": "5d02cdb11cd9d104e722b1d159c434def591becec19fa077a2f7e71084360ca5",
   "toolingSha256": "398224913e48bede6f9847a5719c32235e3c4a5df29a0143dc9407b20fed8d88",
   "files": {
     ".githooks/pre-commit": {
@@ -23,7 +23,7 @@
       "mode": 33188
     },
     "README.md": {
-      "sha256": "0da3ec7405fe0dc355197484ea106e64d03050d7278a35a3c827ef1483f171eb",
+      "sha256": "8d1d12ea47fa0c08d34d03131d60fa007693553695515f3dd0a9a65dc737ebf3",
       "mode": 33188
     },
     "assets/cline-logo-400.png": {
@@ -39,7 +39,7 @@
       "mode": 33188
     },
     "gemini-extension.json": {
-      "sha256": "f88a11f8044b78a3d5e79d09f3b6368ad79cb1675d90bb82d69317d8d3241ee6",
+      "sha256": "145e374a66c3d185ea2220631656000ffd1c4cb62d6671ac47c4c855ec6e2804",
       "mode": 33188
     },
     "llms-install.md": {
