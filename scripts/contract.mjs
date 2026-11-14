@@ -5,25 +5,11 @@ import { createHash } from 'node:crypto';
 import ts from 'typescript';
 
 export const runner = "import { inspectConnector } from './contract.mjs';\nconst findings = inspectConnector(process.cwd());\nif (findings.length) { console.error(findings.join('\\n')); process.exitCode = 1; }\nelse console.log('MCP connector contract passed.');\n";
-export const workflow = `name: Connector contract
-on: [push, pull_request]
-permissions:
-  contents: read
-jobs:
-  contract:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
-        with:
-          node-version: '22'
-          cache: npm
-      - run: npm ci --ignore-scripts
-      - run: npm test
-`;
+export const hook = '#!/bin/sh\nset -eu\nnpm test\n';
+export const installer = "import { execFileSync } from 'node:child_process';\nimport fs from 'node:fs';\nconst root = execFileSync('git', ['rev-parse', '--show-toplevel'], {encoding: 'utf8'}).trim();\nif (fs.realpathSync(root) !== fs.realpathSync(process.cwd())) throw new Error('Install connector hooks from its Git root');\nexecFileSync('git', ['config', '--local', 'core.hooksPath', '.githooks']);\n";
 export const headings = ['Install in Cline', 'Install in Gemini CLI', 'Capabilities and access', 'Tool exposure', 'Update or uninstall', 'Verification', 'Links'];
 export const license = 'Copyright (c) Empline. All rights reserved.\n\nThe hosted service is governed by its published Terms and Privacy Policy.\nNo open-source license is granted for this repository.\n';
-export const testSuiteSha256 = '463daf64151d5d41995b470e5f784601c60c4b5a0eae0bcab02bd61d31e64971';
+export const testSuiteSha256 = '32d609e347e96405a3b9c8bdc86139a424adc69b457335ab053587e4bcf0987f';
 
 /** JSON AST inspection rejects duplicate keys before JSON.parse can erase them. */
 export function parseJson(file, text) {
@@ -79,12 +65,16 @@ export function inspectConnector(root) {
     } else if ('oauth' in server) fail('Public/discovery authentication cannot carry OAuth overrides');
     if (pkg.name !== `${policy.name}-mcp` || pkg.version !== manifest.version || pkg.private !== true || pkg.type !== 'module' ||
         pkg.license !== 'UNLICENSED' || pkg.repository?.url !== `https://github.com/empline/${policy.name}-mcp.git` ||
-        pkg.scripts?.test !== 'node scripts/validate.mjs && node --test tests/contract.test.mjs' ||
+        pkg.scripts?.test !== 'node scripts/validate.mjs && node --test tests/contract.test.mjs' || pkg.scripts.prepare !== 'node scripts/install-hooks.mjs' ||
         JSON.stringify(pkg.devDependencies) !== JSON.stringify({typescript: '6.0.3'}) || pkg.dependencies !== undefined) fail('Package identity, version, license, dependency pin or mandatory test wiring drift');
     if (json('package-lock.json').packages?.['']?.version !== pkg.version) fail('Lockfile version drift');
     if (read('scripts/validate.mjs') !== runner) fail('Executable validation runner must match canonical template');
     if (createHash('sha256').update(read('tests/contract.test.mjs')).digest('hex') !== testSuiteSha256) fail('Required mutation suite drift');
-    if (read('.github/workflows/connector.yml') !== workflow) fail('Mandatory push/PR validation workflow drift');
+    if (read('scripts/install-hooks.mjs') !== installer) fail('Hook installer drift');
+    for (const name of ['pre-commit', 'pre-push']) {
+      if (read(`.githooks/${name}`) !== hook || !(fs.statSync(path.join(root, '.githooks', name)).mode & 0o111)) fail('Mandatory executable Git hook drift');
+    }
+    if (fs.existsSync(path.join(root, '.github/workflows'))) fail('GitHub Actions are retired; verification runs on the workstation');
     if (read('LICENSE') !== license) fail('Explicit proprietary license notice required');
     const readme = read('README.md');
     if (!readme.startsWith(`# ${policy.title} MCP connector\n`)) fail('README title drift');

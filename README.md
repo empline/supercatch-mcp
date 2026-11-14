@@ -135,7 +135,7 @@ Pin `--ref <full-commit-sha>` when a reproducible installation is required.
 
 ## Verification
 
-Run `npm ci --ignore-scripts` and `npm test`. The canonical JSON AST guard rejects metadata drift and duplicate keys; mutation tests prove refusal of unsafe configuration and bypassed validation. Push and pull-request CI run the same checks. These packaging checks do not certify signed-in workflows or live service behavior.
+Run `npm ci` and `npm test`. The canonical JSON AST guard rejects metadata drift and duplicate keys; mutation tests prove refusal of unsafe configuration and bypassed validation. The installed pre-commit and pre-push hooks run the same checks on the workstation. GitHub Actions are disabled. These packaging checks do not certify signed-in workflows or live service behavior.
 
 ### Maintainers
 

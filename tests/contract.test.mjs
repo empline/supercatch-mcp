@@ -28,7 +28,7 @@ const cases = [
 for (const [name, file, mutate] of cases) test(`rejects ${name}`, () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'connector-contract-'));
   try {
-    for (const entry of ['README.md', 'LICENSE', 'connector-policy.json', 'gemini-extension.json', 'package.json', 'package-lock.json', 'scripts', '.github', 'tests'])
+    for (const entry of ['README.md', 'LICENSE', 'connector-policy.json', 'gemini-extension.json', 'package.json', 'package-lock.json', 'scripts', '.githooks', 'tests'])
       fs.cpSync(path.join(process.cwd(), entry), path.join(root, entry), {recursive: true});
     const value = JSON.parse(fs.readFileSync(path.join(root, file), 'utf8'));
     mutate(value);
@@ -36,10 +36,10 @@ for (const [name, file, mutate] of cases) test(`rejects ${name}`, () => {
     assert.ok(inspectConnector(root).length > 0);
   } finally { fs.rmSync(root, {recursive: true, force: true}); }
 });
-for (const [file, value] of [['scripts/validate.mjs', '// inspectConnector(process.cwd())'], ['.github/workflows/connector.yml', 'name: bypass'], ['README.md', '# Missing sections'], ['tests/contract.test.mjs', '// no tests']]) test(`rejects bypass in ${file}`, () => {
+for (const [file, value] of [['scripts/validate.mjs', '// inspectConnector(process.cwd())'], ['.githooks/pre-push', '#!/bin/sh\nexit 0'], ['README.md', '# Missing sections'], ['tests/contract.test.mjs', '// no tests']]) test(`rejects bypass in ${file}`, () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'connector-contract-'));
   try {
-    for (const entry of ['README.md', 'LICENSE', 'connector-policy.json', 'gemini-extension.json', 'package.json', 'package-lock.json', 'scripts', '.github', 'tests'])
+    for (const entry of ['README.md', 'LICENSE', 'connector-policy.json', 'gemini-extension.json', 'package.json', 'package-lock.json', 'scripts', '.githooks', 'tests'])
       fs.cpSync(path.join(process.cwd(), entry), path.join(root, entry), {recursive: true});
     fs.writeFileSync(path.join(root, file), value);
     assert.ok(inspectConnector(root).length > 0);
