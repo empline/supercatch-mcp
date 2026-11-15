@@ -54,7 +54,7 @@ for (const [name, file, mutate] of cases) test(`rejects ${name}`, () => {
     assert.ok(inspectConnector(root).length > 0);
   } finally { fs.rmSync(root, {recursive: true, force: true}); }
 });
-for (const [file, value] of [['scripts/validate.mjs', '// inspectConnector(process.cwd())'], ['.githooks/pre-push', '#!/bin/sh\nexit 0'], ['README.md', '# Missing sections'], ['tests/contract.test.mjs', '// no tests']]) test(`rejects bypass in ${file}`, () => {
+for (const [file, value] of [['scripts/git-attribution.cjs', '// no guard'], ['scripts/validate-attribution.cjs', '// no guard'], ['.githooks/prepare-commit-msg', '#!/bin/sh\nexit 0'], ['.githooks/commit-msg', '#!/bin/sh\nexit 0'], ['scripts/validate.mjs', '// inspectConnector(process.cwd())'], ['.githooks/pre-push', '#!/bin/sh\nexit 0'], ['README.md', '# Missing sections'], ['tests/contract.test.mjs', '// no tests']]) test(`rejects bypass in ${file}`, () => {
   const root = copyFixture();
   try {
     fs.writeFileSync(path.join(root, file), value);

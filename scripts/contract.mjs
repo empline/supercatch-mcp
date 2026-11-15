@@ -5,14 +5,18 @@ import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import ts from 'typescript';
 
-export const runner = "import fs from 'node:fs';\nimport { inspectConnector, inspectGitIndex, inspectGitRefs } from './contract.mjs';\nconst mode = process.argv[2] ?? '--working';\nif (process.argv.length > 3 || !['--working', '--index', '--refs'].includes(mode)) throw new Error('Invalid connector validation mode');\nconst findings = mode === '--index' ? inspectGitIndex(process.cwd()) : mode === '--refs' ? inspectGitRefs(process.cwd(), fs.readFileSync(0, 'utf8')) : inspectConnector(process.cwd());\nif (findings.length) { console.error(findings.join('\\n')); process.exitCode = 1; }\nelse console.log('MCP connector contract passed.');\n";
+export const runner = "import fs from 'node:fs';\nimport { inspectConnector, inspectGitIndex, inspectGitRefs } from './contract.mjs';\nimport attribution from './git-attribution.cjs';\nconst mode = process.argv[2] ?? '--working';\nif (process.argv.length > 3 || !['--working', '--index', '--refs'].includes(mode)) throw new Error('Invalid connector validation mode');\nconst input = mode === '--refs' ? fs.readFileSync(0, 'utf8') : '';\nconst findings = mode === '--index' ? inspectGitIndex(process.cwd()) : mode === '--refs' ? [...inspectGitRefs(process.cwd(), input), ...attribution.inspectAttributionPush(process.cwd(), input)] : inspectConnector(process.cwd());\nif (findings.length) { console.error(findings.join('\\n')); process.exitCode = 1; }\nelse console.log('MCP connector contract passed.');\n";
+export const attributionRunner = "const {inspectPendingAttribution} = require('./git-attribution.cjs');\nif (process.argv.length !== 3) throw new Error('Expected a Git commit message path');\nconst findings = inspectPendingAttribution(process.cwd(), process.argv[2]);\nif (findings.length) { console.error(findings.join('\\n')); process.exitCode = 1; }\n";
+export const messageHook = "#!/bin/sh\nset -eu\nnode scripts/validate-attribution.cjs \"$1\"\n";
+export const attributionSha256 = "59f4e5078cabc8f5ce0daec37bee7cf65c597021fe45b0b8ede264560a2979bf";
+
 export const hook = '#!/bin/sh\nset -eu\nnode scripts/validate.mjs --index\nnpm test\n';
 export const pushHook = '#!/bin/sh\nset -eu\nnode scripts/validate.mjs --refs\nnpm test\n';
 export const installer = "import { execFileSync } from 'node:child_process';\nimport fs from 'node:fs';\nconst root = execFileSync('git', ['rev-parse', '--show-toplevel'], {encoding: 'utf8'}).trim();\nif (fs.realpathSync(root) !== fs.realpathSync(process.cwd())) throw new Error('Install connector hooks from its Git root');\nexecFileSync('git', ['config', '--local', 'core.hooksPath', '.githooks']);\n";
 export const headings = ['Install in Cline', 'Install in Gemini CLI', 'Capabilities and access', 'Tool exposure', 'Update or uninstall', 'Verification', 'Links'];
 export const license = 'Copyright (c) Empline. All rights reserved.\n\nThe hosted service is governed by its published Terms and Privacy Policy.\nNo open-source license is granted for this repository.\n';
 export const publicPayloadFile = file => ['README.md', 'llms-install.md', 'cline-installation-proof.json', 'plugin.json', 'mcp.json'].includes(file) || /^assets\/[a-zA-Z0-9_./-]+\.(png|jpg|jpeg|webp|mp4)$/.test(file);
-export const testSuiteSha256 = '9815d1d20e306b2605459a68847bb50c5da7a43288a5910c4d5518de0e7ca9e1';
+export const testSuiteSha256 = "e9ee594792cd887b34060f19c1640321e4abe7313ef19cc5b91c17c307abb320";
 
 /** JSON AST inspection rejects duplicate keys before JSON.parse can erase them. */
 export function parseJson(file, text) {
@@ -101,6 +105,10 @@ export function inspectConnectorContents({read, readBinary, exists, executable, 
     if (read('scripts/validate.mjs') !== runner) fail('Executable validation runner must match canonical template');
     if (createHash('sha256').update(read('tests/contract.test.mjs')).digest('hex') !== testSuiteSha256) fail('Required mutation suite drift');
     if (read('scripts/install-hooks.mjs') !== installer) fail('Hook installer drift');
+    if (read('scripts/validate-attribution.cjs') !== attributionRunner || createHash('sha256').update(readBinary('scripts/git-attribution.cjs')).digest('hex') !== attributionSha256) fail('Shared Git attribution guard drift');
+    for (const name of ['prepare-commit-msg', 'commit-msg']) {
+      if (read('.githooks/' + name) !== messageHook || !executable('.githooks/' + name)) fail('Mandatory message attribution hook drift');
+    }
     for (const name of ['pre-commit', 'pre-push']) {
       if (read(`.githooks/${name}`) !== (name === 'pre-push' ? pushHook : hook) || !executable(`.githooks/${name}`)) fail('Mandatory executable Git hook drift');
     }
@@ -116,7 +124,7 @@ export function inspectConnectorContents({read, readBinary, exists, executable, 
       if (JSON.stringify(files()) !== JSON.stringify(expected)) fail('Generated distribution has undeclared or missing files');
       for (const [file, value] of Object.entries(provenance.files)) {
         if (!/^[a-zA-Z0-9_./-]+$/.test(file) || file.split('/').some(part => !part || part === '.' || part === '..' || part === '.git' || part.startsWith('.env')) ||
-            !publicPayloadFile(file) && !['.gitignore', '.githooks/pre-commit', '.githooks/pre-push', 'LICENSE', 'connector-policy.json', 'gemini-extension.json', 'package.json', 'package-lock.json', 'scripts/contract.mjs', 'scripts/install-hooks.mjs', 'scripts/validate.mjs', 'tests/contract.test.mjs'].includes(file) ||
+            !publicPayloadFile(file) && !['.githooks/prepare-commit-msg', '.githooks/commit-msg', 'scripts/git-attribution.cjs', 'scripts/validate-attribution.cjs', '.gitignore', '.githooks/pre-commit', '.githooks/pre-push', 'LICENSE', 'connector-policy.json', 'gemini-extension.json', 'package.json', 'package-lock.json', 'scripts/contract.mjs', 'scripts/install-hooks.mjs', 'scripts/validate.mjs', 'tests/contract.test.mjs'].includes(file) ||
             !/^[a-f0-9]{64}$/.test(value.sha256) || ![0o100644, 0o100755].includes(value.mode) ||
             createHash('sha256').update(readBinary(file)).digest('hex') !== value.sha256 || executable(file) !== Boolean(value.mode & 0o111)) fail('Generated distribution differs from its source receipt: ' + file);
       }
