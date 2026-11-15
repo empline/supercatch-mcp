@@ -3,8 +3,8 @@
   "sourceRepository": "https://github.com/empline/supercatch",
   "sourceDirectory": "integrations/mcp",
   "manifestSource": "integrations/gemini/gemini-extension.json",
-  "sourceSha256": "0c89c632517be7eb37530889b42b2cbf00c42ead652c17683b3f6173809ec216",
-  "toolingSha256": "984d914ff4bc84c24fd88a3d106ab3f0ab20d4be4886d6ce0d07e55f237e9e01",
+  "sourceSha256": "7063e170e7dae3c421facca2df54277f56b725932bed9e0bb3b9d8dbf4ff181a",
+  "toolingSha256": "afcb0183237d6debdc9d8a91964692a1707b86827d75ac78b11345c1ca37ca31",
   "files": {
     ".githooks/commit-msg": {
       "sha256": "f82321fc6a4e76f639b90d076439963321be8a06ea0b1744e469cd66f3acff0f",
@@ -63,7 +63,7 @@
       "mode": 33188
     },
     "scripts/contract.mjs": {
-      "sha256": "f1105fea22b0af8f6c6d56cbb7bf9ae46a63c565a18895f3075f22ec81512e69",
+      "sha256": "b530ec8c5de7500af5465d625d4ae69b81d26087c54f17f0de7a78e135ba1a8e",
       "mode": 33188
     },
     "scripts/git-attribution.cjs": {

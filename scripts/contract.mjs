@@ -190,10 +190,17 @@ export function inspectGitRefs(root, input) {
   try {
     if (typeof input !== 'string' || input.length > 65536) throw new Error('Connector push ref input exceeds its limit');
     const ids = new Set();
+    const env = Object.fromEntries(Object.entries(process.env).filter(([key]) => !key.startsWith('GIT_')));
+    const git = args => execFileSync('git', ['-C', root, ...args], {env, encoding: 'utf8', timeout: 30000, maxBuffer: 1048576}).trim();
     for (const line of input.trim().split('\n').filter(Boolean)) {
       const parts = line.trim().split(/\s+/);
       if (parts.length !== 4 || ![parts[1], parts[3]].every(value => /^[a-f0-9]{40}(?:[a-f0-9]{24})?$/.test(value))) throw new Error('Malformed connector push ref input');
-      if (!/^0+$/.test(parts[1])) ids.add(parts[1]);
+      if (/^0+$/.test(parts[1])) continue;
+      // Retagging metadata must preserve the original release bytes and modes.
+      // Older releases have their own guard versions; never execute those guards.
+      if (parts[2].startsWith('refs/tags/') && !/^0+$/.test(parts[3]) &&
+          git(['rev-parse', '--verify', parts[1] + '^{tree}']) === git(['rev-parse', '--verify', parts[3] + '^{tree}'])) continue;
+      ids.add(parts[1]);
     }
     if (!input.trim()) ids.add(execFileSync('git', ['-C', root, 'rev-parse', '--verify', 'HEAD'], {encoding: 'utf8'}).trim());
     return [...ids].flatMap(oid => inspectGitSnapshot(root, false, oid).map(finding => oid + ': ' + finding));
