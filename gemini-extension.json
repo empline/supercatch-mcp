@@ -1,6 +1,6 @@
 {
   "name": "supercatch",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "description": "Search SuperCatch cards and manage your account and store through separately consented, approval-protected MCP tools.",
   "mcpServers": {
     "supercatch": {
@@ -47,6 +47,7 @@
         "supercatch_list_order_items",
         "supercatch_get_sales_activity",
         "supercatch_get_listing_stock_aging",
+        "supercatch_list_stock_aging",
         "supercatch_list_low_stock",
         "supercatch_get_import_job",
         "supercatch_list_saved_searches",
